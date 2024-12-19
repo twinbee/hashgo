@@ -8,23 +8,24 @@ export const connectToWebDav = (preferences) => {
   });
 };
 
-// Fetch a file
-export const fetchFile = async (client, filePath) => {
-  try {
-    const content = await client.getFileContents(filePath, { format: 'text' });
-    return content;
-  } catch (err) {
-    console.error('Error fetching file:', err);
-    throw err;
+// Fetch a file from the backend
+export const fetchFile = async (filePath) => {
+  const response = await fetch(`http://localhost:3001/ftp/fetch?path=${encodeURIComponent(filePath)}`);
+  if (!response.ok) {
+    throw new Error('Failed to fetch file');
   }
+  return await response.text();
 };
 
-// Upload a file
-export const uploadFile = async (client, filePath, content) => {
-  try {
-    await client.putFileContents(filePath, content, { overwrite: true });
-  } catch (err) {
-    console.error('Error uploading file:', err);
-    throw err;
+// Upload a file to the backend
+export const uploadFile = async (filePath, content) => {
+  const response = await fetch(`http://localhost:3001/ftp/upload`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ filePath, content }),
+  });
+  if (!response.ok) {
+    throw new Error('Failed to upload file');
   }
+  return await response.json();
 };
